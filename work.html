@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>workspace</title>
+    <style>
+        .content {
+            margin: 0;
+            border: 0;
+            padding: 0;
+            flex-grow: 1;
+        }
+
+        .content-hidden {
+            display: none;
+        }
+
+        body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .header-ele {
+            border: rgba(217, 210, 210, 0.97) solid 1px;
+            /*height: 30px;*/
+            width: 200px;
+            flex-shrink: 1;
+            border-radius: 5px;
+            text-align: center;
+            color: #111111;
+            padding: 1px;
+        }
+
+        .header-selected {
+            background: #92c2bc;
+            /*color: #ffffff;*/
+        }
+
+        .header-ele:hover {
+            cursor: default;
+            background: #e3e3e3;
+        }
+
+        #header {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+        }
+    </style>
+    <script src="https://unpkg.com/vue@next"></script>
+
+</head>
+
+<body id="list-root">
+
+<div id="header">
+    <div class="header-ele"
+         :class="{'header-selected':selected===-1}"
+         @click=" selected=-1 ">
+         设置
+    </div>
+    <div v-for="(ele,i) in elements"
+         class="header-ele"
+         :class="{'header-selected':selected===i}"
+         @click=" selected=i ">
+        {{ele.title}}
+    </div>
+</div>
+<div class="content"
+    :class="{'content-hidden':selected!==-1}">
+    <table>
+
+        <tr>
+            <td><input type="text" v-model="input_title"></td>
+            <td><input type="text" v-model="input_src"></td>
+            <td><button @click="add_ele()">✅</button></td>
+        </tr>
+
+        <template v-for="(ele,i) in elements">
+        <tr>
+            <td>{{ele.title}}</td>
+            <td>{{ele.src}}</td>
+            <td><button @click="remove_ele(i)">❌</button></td>
+        </tr>
+        </template>
+        <tr>
+            <td>{{input_title}}</td>
+            <td>{{input_src}}</td>
+        </tr>
+    </table>
+</div>
+<iframe v-for="(ele,i) in elements"
+        class="content"
+        :class="{'content-hidden':selected!==i}"
+        :src="ele.src">
+</iframe>
+
+
+</body>
+<script>
+    const ListRendering = {
+        data() {
+            elements = getViews()
+            return {
+                elements: elements,
+                selected: -1,
+                input_title:"",
+                input_src:""
+            }
+        },
+        methods:{
+            remove_ele(i){
+                // console.log(i)
+                elements.splice(i,1)
+                this.$forceUpdate()
+                setViews(elements)
+            },
+            add_ele(){
+                this.elements.push({title:this.input_title,src:this.input_src})
+                this.$forceUpdate()
+                setViews(elements)
+                this.input_title = ""
+                this.input_src = ""
+            }
+        }
+    }
+    Vue.createApp(ListRendering).mount('#list-root')
+
+    function setViews(e) {
+        localStorage.setItem("elements",JSON.stringify(e))
+    }
+
+    function getViews(){
+        elements = JSON.parse(localStorage.getItem("elements"))
+        if (elements===null){
+            return []
+        }
+        return elements
+    }
+
+</script>
+</html>
